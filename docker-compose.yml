@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  minimal-metrics:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    container_name: minimal-metrics
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - HOST=0.0.0.0
+      - DATABASE_PATH=/app/data/metrics.db
+      - CORS_ORIGIN=*
+      - RATE_LIMIT_WINDOW=60000
+      - RATE_LIMIT_MAX=100
+      - RAW_DATA_RETENTION=24
+      - AGGREGATED_DATA_RETENTION=8760
+    volumes:
+      - metrics_data:/app/data
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - metrics_network
+
+volumes:
+  metrics_data:
+    driver: local
+
+networks:
+  metrics_network:
+    driver: bridge
