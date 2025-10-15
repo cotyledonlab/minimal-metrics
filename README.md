@@ -148,7 +148,7 @@ This repository includes configuration files for various AI coding assistants to
 - **`.github/copilot-instructions.md`** - Instructions for GitHub Copilot
 - **`.cursorrules`** - Rules for Cursor AI
 
-These files provide context about the project architecture, coding conventions, and development workflows to improve AI-assisted coding.
+These files provide context about the project architecture, coding conventions, and development workflows to improve AI-assisted development.
 
 ## Deployment
 
