@@ -140,6 +140,16 @@ npm run init:db
 npm test
 ```
 
+## AI Assistant Configuration
+
+This repository includes configuration files for various AI coding assistants to help them understand the codebase:
+
+- **`CLAUDE.md`** - Configuration for Claude Code (claude.ai/code)
+- **`.github/copilot-instructions.md`** - Instructions for GitHub Copilot
+- **`.cursorrules`** - Rules for Cursor AI
+
+These files provide context about the project architecture, coding conventions, and development workflows to improve AI-assisted coding.
+
 ## Deployment
 
 ### Docker Deployment
