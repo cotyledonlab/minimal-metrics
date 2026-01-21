@@ -9,26 +9,39 @@
     "dev": "node --watch server/index.js",
     "build:tracker": "node tracker/build.js",
     "init:db": "node server/db/init.js",
-    "test": "node --test"
+    "test": "node --test tests/unit/*.test.js",
+    "test:integration": "node --test --test-concurrency=1 tests/integration/*.test.js",
+    "test:all": "node --test --test-concurrency=1 tests/**/*.test.js",
+    "test:coverage": "c8 --reporter=text --reporter=lcov node --test --test-concurrency=1 tests/**/*.test.js",
+    "test:watch": "node --test --watch --test-concurrency=1 tests/**/*.test.js",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "typecheck": "tsc --noEmit"
   },
   "keywords": [
     "analytics",
     "privacy",
     "metrics",
     "dashboard",
-    "self-hosted"
+    "self-hosted",
+    "gdpr",
+    "lightweight"
   ],
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "better-sqlite3": "^9.2.2",
-    "dotenv": "^16.3.1"
+    "better-sqlite3": "^11.7.0",
+    "dotenv": "^16.4.7"
   },
   "devDependencies": {
+    "c8": "^8.0.0",
     "esbuild": "^0.19.11",
-    "terser": "^5.26.0"
+    "eslint": "^9.0.0",
+    "supertest": "^6.3.0",
+    "terser": "^5.26.0",
+    "typescript": "^5.3.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=24.0.0"
   }
 }

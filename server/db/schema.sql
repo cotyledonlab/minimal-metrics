@@ -15,6 +15,12 @@ CREATE TABLE IF NOT EXISTS events (
     timezone TEXT,
     event_name TEXT DEFAULT 'pageview',
     event_props TEXT,
+    -- UTM campaign tracking parameters
+    utm_source TEXT,
+    utm_medium TEXT,
+    utm_campaign TEXT,
+    utm_term TEXT,
+    utm_content TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -23,6 +29,7 @@ CREATE INDEX IF NOT EXISTS idx_events_timestamp ON events(timestamp);
 CREATE INDEX IF NOT EXISTS idx_events_page_url ON events(page_url);
 CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_hash);
 CREATE INDEX IF NOT EXISTS idx_events_created ON events(created_at);
+CREATE INDEX IF NOT EXISTS idx_events_utm ON events(utm_source, utm_medium, utm_campaign);
 
 -- Aggregated hourly statistics
 CREATE TABLE IF NOT EXISTS stats_hourly (

@@ -1,76 +1,154 @@
 # Minimal Metrics
 
-A privacy-first, lightweight analytics dashboard as an alternative to Google Analytics. Built with simplicity, speed, and user privacy as core principles.
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Node.js Version](https://img.shields.io/badge/node-%3E%3D24.0.0-brightgreen)](https://nodejs.org)
+[![Docker](https://img.shields.io/badge/docker-ready-blue)](https://hub.docker.com)
 
-## Features
+**Privacy-first web analytics in under 2KB. No cookies. No consent banners. 100% GDPR compliant.**
 
-- 🚀 **Ultra-lightweight tracking script** (< 2KB minified)
-- 🔒 **Privacy-first** - No cookies, no personal data collection, no cross-site tracking
-- ⚡ **Real-time dashboard** with essential metrics
-- 📊 **Core analytics** - Page views, referrers, popular pages, basic geographic data
-- 🌍 **Self-hostable** - Deploy on your own infrastructure
-- 🐳 **Docker support** for easy deployment
-- 📤 **Export functionality** (CSV/JSON)
-- 🎨 **Clean, responsive design** with dark/light mode
+---
 
-## Quick Start
+## Why Minimal Metrics?
+
+> Google Analytics tracks your users across the web. We just count page views.
+
+Modern analytics tools collect far more data than you need, require cookie consent banners, and send your visitors' data to third parties. Minimal Metrics takes a different approach:
+
+- **Your data stays yours** - Self-hosted on your infrastructure
+- **No consent banners needed** - We don't collect personal data, so GDPR doesn't require consent
+- **Blazing fast** - Our 1.5KB script loads 30x faster than Google Analytics
+- **Simple by design** - See what matters: page views, referrers, and trends
+
+---
+
+## Quick Demo
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│  MINIMAL METRICS                            [Light/Dark]    │
+├─────────────────────────────────────────────────────────────┤
+│                                                             │
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐         │
+│  │   12,847    │  │    3,421    │  │      42     │         │
+│  │ Page Views  │  │  Visitors   │  │   Active    │         │
+│  └─────────────┘  └─────────────┘  └─────────────┘         │
+│                                                             │
+│  Top Pages              Top Referrers                       │
+│  ─────────────────      ─────────────────                   │
+│  /                2.1k  google.com      892                 │
+│  /blog            1.4k  twitter.com     341                 │
+│  /pricing          891  direct          298                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## 30-Second Setup
 
 ### Using Docker (Recommended)
 
-1. Clone the repository:
 ```bash
 git clone https://github.com/yourusername/minimal-metrics.git
 cd minimal-metrics
-```
-
-2. Start with Docker Compose:
-```bash
 docker-compose up -d
 ```
 
-3. Access the dashboard at `http://localhost:3000/dashboard`
+Open `http://localhost:3000/dashboard` - you're done!
 
 ### Manual Installation
 
-1. **Prerequisites**: Node.js 18+ and npm
-
-2. **Install dependencies**:
 ```bash
 npm install
-```
-
-3. **Initialize database**:
-```bash
 npm run init:db
-```
-
-4. **Build tracking script**:
-```bash
 npm run build:tracker
-```
-
-5. **Start the server**:
-```bash
 npm start
 ```
 
-## Adding Tracking to Your Website
+---
 
-Add this snippet to your website's `<head>` section:
+## Add to Your Website
+
+Drop this one line into your site's `<head>`:
 
 ```html
-<!-- Minimal Metrics -->
-<script async defer data-host="https://your-domain.com" src="https://your-domain.com/tracker.min.js"></script>
+<script async defer data-host="https://your-metrics-server.com" src="https://your-metrics-server.com/tracker.min.js"></script>
 ```
 
-Replace `https://your-domain.com` with your Minimal Metrics server URL.
+That's it. No configuration. No cookies. No consent banners.
+
+---
+
+## What We Track vs. What We Don't
+
+| We Track | We Don't Track |
+|----------|----------------|
+| Page views | Individual users |
+| Referrer sources | Personal data |
+| Country (from headers) | IP addresses |
+| Screen size | Device fingerprints |
+| Custom events | Cross-site behavior |
+| Session count | Demographics |
+
+---
+
+## How We Protect Privacy
+
+### No Cookies, Ever
+We use `sessionStorage` that's automatically cleared when the tab closes. Nothing persists.
+
+### IP Hashing with Daily Salt
+```
+IP 192.168.1.1 → SHA256(IP + date + salt) → a7f3b2...
+```
+Even we can't reverse it. Tomorrow, the same IP produces a different hash.
+
+### Respects Do Not Track
+If a browser sends the DNT header, our script doesn't run. Period.
+
+### Automatic Data Cleanup
+Raw events are deleted after 24 hours. Only aggregated, anonymous statistics remain.
+
+---
+
+## Comparison
+
+| Feature | Minimal Metrics | Google Analytics | Plausible | Umami |
+|---------|----------------|------------------|-----------|-------|
+| **Script Size** | 1.5KB | 45KB+ | 1KB | 2KB |
+| **Self-hosted** | Yes | No | Yes ($) | Yes |
+| **Cookies** | None | Multiple | None | None |
+| **GDPR Consent Needed** | No | Yes | No | No |
+| **Open Source** | MIT | No | AGPL | MIT |
+| **Real-time Dashboard** | Yes | Yes | Yes | Yes |
+| **UTM Tracking** | Yes | Yes | Yes | Yes |
+| **Custom Events** | Yes | Yes | Yes | Yes |
+| **Conversion Goals** | Basic | Advanced | Yes | Yes |
+| **Price** | Free | Free* | $9+/mo | Free |
+
+*Google Analytics is "free" but you pay with your users' data.
+
+---
+
+## What We Intentionally Don't Build
+
+Minimal Metrics is opinionated. These aren't missing features—they're design decisions:
+
+- **No demographics** - We don't know (or care) about age/gender
+- **No cross-device tracking** - Each device is treated as anonymous
+- **No session recordings** - We count visitors, we don't watch them
+- **No fingerprinting** - No canvas, fonts, or WebGL detection
+- **No user accounts** - Single-tenant, no shared infrastructure
+- **No A/B testing** - Use a dedicated tool for experiments
+
+---
 
 ## Configuration
 
-Copy `.env.example` to `.env` and configure:
+Copy `.env.example` to `.env`:
 
 ```env
-# Server Configuration
+# Server
 PORT=3000
 HOST=0.0.0.0
 
@@ -78,120 +156,94 @@ HOST=0.0.0.0
 DATABASE_PATH=./data/metrics.db
 
 # Security
-CORS_ORIGIN=*
-RATE_LIMIT_WINDOW=60000
-RATE_LIMIT_MAX=100
+AUTH_TOKEN=              # Optional: Set to require dashboard authentication
+CORS_ORIGINS=*           # Comma-separated allowed origins, or * for all
+
+# Rate Limiting
+RATE_LIMIT_WINDOW=60000  # Time window in ms
+RATE_LIMIT_MAX=100       # Max requests per window
 
 # Data Retention (hours)
-RAW_DATA_RETENTION=24
-AGGREGATED_DATA_RETENTION=8760
+RAW_DATA_RETENTION=24           # Keep raw events for 24 hours
+AGGREGATED_DATA_RETENTION=8760  # Keep aggregated data for 1 year
 ```
 
-## API Endpoints
+---
 
-### Collection
-- `POST /api/collect` - Receive tracking data
+## API Reference
 
-### Statistics
-- `GET /api/stats/realtime` - Current active visitors
-- `GET /api/stats/overview?period=7d` - Dashboard overview
-- `GET /api/stats/pages?period=7d&limit=20` - Top pages
-- `GET /api/stats/referrers?period=7d&limit=20` - Top referrers
-- `GET /api/stats/countries?period=7d` - Geographic data
-- `GET /api/stats/hourly?date=2024-01-01` - Hourly breakdown
+### Tracking Endpoint
 
-### Export
-- `GET /api/export?type=overview&format=json&period=30d` - Export data
+```
+POST /api/collect
+```
 
-#### Supported Parameters:
-- **period**: `1h`, `24h`, `7d`, `30d`, `90d`
-- **format**: `json`, `csv`
+Receives tracking data from the client script. Rate limited.
+
+### Statistics Endpoints
+
+All endpoints support `?period=1h|24h|7d|30d|90d`
+
+| Endpoint | Description |
+|----------|-------------|
+| `GET /api/stats/realtime` | Current active visitors (5-min window) |
+| `GET /api/stats/overview` | Dashboard summary with top pages/referrers |
+| `GET /api/stats/pages?limit=20` | Top pages by view count |
+| `GET /api/stats/referrers?limit=20` | Top traffic sources |
+| `GET /api/stats/countries` | Visitor count by country |
+| `GET /api/stats/hourly?date=YYYY-MM-DD` | Hourly breakdown for a specific day |
+| `GET /api/stats/campaigns` | UTM campaign performance |
+
+### Export Endpoint
+
+```
+GET /api/export?type=pages&format=csv&period=30d
+```
+
 - **type**: `overview`, `pages`, `referrers`, `countries`
+- **format**: `json`, `csv`
+- **period**: `1h`, `24h`, `7d`, `30d`, `90d`
 
-## Privacy Features
+### Health Check
 
-- **No cookies or localStorage** - Uses session-based tracking only
-- **IP address hashing** - IPs are SHA-256 hashed and salted
-- **No personal data** - Only aggregated metrics are stored
-- **GDPR compliant** - No personal data collection
-- **Respects DNT header** - Honors Do Not Track requests
-- **Data retention limits** - Configurable data cleanup
-
-## Data Storage
-
-- **SQLite database** for lightweight, file-based storage
-- **Automatic aggregation** - Raw events aggregated hourly
-- **Configurable retention** - Cleanup old data automatically
-- **WAL mode** for better concurrent access
-
-## Development
-
-```bash
-# Development mode with auto-restart
-npm run dev
-
-# Build tracking script
-npm run build:tracker
-
-# Initialize/reset database
-npm run init:db
-
-# Run tests
-npm test
+```
+GET /health
 ```
 
-## AI Assistant Configuration
+Returns server status, timestamp, and uptime.
 
-This repository includes configuration files for various AI coding assistants to help them understand the codebase:
-
-- **`CLAUDE.md`** - Configuration for Claude Code (claude.ai/code)
-- **`.github/copilot-instructions.md`** - Instructions for GitHub Copilot
-- **`.cursorrules`** - Rules for Cursor AI
-
-These files provide context about the project architecture, coding conventions, and development workflows to improve AI-assisted development.
+---
 
 ## Deployment
 
-### Docker Deployment
+### Docker Compose (Recommended)
 
-1. **Build and deploy**:
-```bash
-docker build -f docker/Dockerfile -t minimal-metrics .
-docker run -d -p 3000:3000 -v metrics_data:/app/data minimal-metrics
+```yaml
+version: '3.8'
+services:
+  minimal-metrics:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - metrics_data:/app/data
+    environment:
+      - AUTH_TOKEN=your-secret-token
+    restart: unless-stopped
+
+volumes:
+  metrics_data:
 ```
 
-2. **Using Docker Compose**:
-```bash
-docker-compose up -d
-```
+### Behind Nginx
 
-### VPS Deployment
-
-1. **Install on Ubuntu/Debian**:
-```bash
-# Install Node.js 18+
-curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
-sudo apt-get install -y nodejs
-
-# Clone and setup
-git clone https://github.com/yourusername/minimal-metrics.git
-cd minimal-metrics
-npm install --production
-npm run init:db
-npm run build:tracker
-
-# Setup systemd service
-sudo cp minimal-metrics.service /etc/systemd/system/
-sudo systemctl enable minimal-metrics
-sudo systemctl start minimal-metrics
-```
-
-2. **Nginx reverse proxy**:
 ```nginx
 server {
     listen 80;
-    server_name your-domain.com;
-    
+    server_name metrics.yourdomain.com;
+
     location / {
         proxy_pass http://localhost:3000;
         proxy_set_header Host $host;
@@ -202,47 +254,127 @@ server {
 }
 ```
 
-## Performance
+### Systemd Service
 
-- **Sub-2KB tracking script** - Minimal impact on page load
-- **Efficient batching** - Events batched every 5 seconds
-- **SQLite optimization** - WAL mode, proper indexing
-- **Memory caching** - In-memory stats for real-time data
-- **Rate limiting** - Protection against abuse
+```ini
+[Unit]
+Description=Minimal Metrics
+After=network.target
 
-## Comparison with Google Analytics
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/opt/minimal-metrics
+ExecStart=/usr/bin/node server/index.js
+Restart=on-failure
+Environment=NODE_ENV=production
 
-| Feature | Minimal Metrics | Google Analytics |
-|---------|----------------|------------------|
-| Privacy | ✅ No tracking | ❌ Extensive tracking |
-| Size | ✅ <2KB | ❌ ~45KB+ |
-| Self-hosted | ✅ Yes | ❌ No |
-| GDPR Ready | ✅ Yes | ⚠️ Requires consent |
-| Real-time | ✅ Yes | ✅ Yes |
-| Page views | ✅ Yes | ✅ Yes |
-| Referrers | ✅ Yes | ✅ Yes |
-| Countries | ✅ Yes | ✅ Yes |
-| Demographics | ❌ No | ✅ Yes |
-| Conversion tracking | ❌ Basic | ✅ Advanced |
+[Install]
+WantedBy=multi-user.target
+```
+
+---
+
+## Custom Event Tracking
+
+Track button clicks, form submissions, or any custom action:
+
+```javascript
+// Basic event
+window.mm.track('signup_clicked');
+
+// Event with properties
+window.mm.track('purchase', {
+  plan: 'pro',
+  value: 29
+});
+```
+
+Events appear in your dashboard and can be exported via the API.
+
+---
+
+## Development
+
+```bash
+# Development mode with auto-restart
+npm run dev
+
+# Build tracking script (required after tracker changes)
+npm run build:tracker
+
+# Initialize/reset database
+npm run init:db
+
+# Run tests
+npm test
+
+# Run tests with coverage
+npm run test:coverage
+
+# Lint code
+npm run lint
+```
+
+---
+
+## Architecture
+
+```
+minimal-metrics/
+├── tracker/           # Client-side tracking script (<2KB)
+│   ├── tracker.js     # Source code
+│   └── build.js       # Minification with Terser
+├── server/            # Node.js backend
+│   ├── index.js       # HTTP server & routing
+│   ├── api/           # REST endpoints
+│   ├── db/            # SQLite operations
+│   ├── middleware/    # Auth, security headers
+│   └── utils/         # Rate limiting, validation
+├── dashboard/         # Vanilla JS frontend
+│   ├── index.html
+│   ├── app.js
+│   └── style.css
+├── tests/             # Test suite
+└── docs/              # Extended documentation
+```
+
+---
+
+## Documentation
+
+- [Installation Guide](docs/installation.md)
+- [Configuration Reference](docs/configuration.md)
+- [API Documentation](docs/api.md)
+- [Deployment Guide](docs/deployment.md)
+- [Privacy Architecture](docs/privacy.md)
+
+---
 
 ## Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature-name`
-3. Commit changes: `git commit -am 'Add feature'`
-4. Push to branch: `git push origin feature-name`
-5. Submit a pull request
+3. Run tests: `npm test`
+4. Commit changes: `git commit -am 'Add feature'`
+5. Push to branch: `git push origin feature-name`
+6. Submit a pull request
 
-## License
-
-MIT License - see [LICENSE](LICENSE) file for details.
-
-## Support
-
-- 📖 [Documentation](https://github.com/yourusername/minimal-metrics/wiki)
-- 🐛 [Issue Tracker](https://github.com/yourusername/minimal-metrics/issues)
-- 💬 [Discussions](https://github.com/yourusername/minimal-metrics/discussions)
+Please ensure all tests pass and add tests for new functionality.
 
 ---
 
-Built with ❤️ for developers who value privacy and simplicity.
+## License
+
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+## Support
+
+- [Issue Tracker](https://github.com/yourusername/minimal-metrics/issues)
+- [Discussions](https://github.com/yourusername/minimal-metrics/discussions)
+
+---
+
+**Built for developers who believe analytics shouldn't require a privacy policy.**

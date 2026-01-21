@@ -27,11 +27,12 @@ export function hashSession(sessionId, ip) {
 export function insertEvent(data) {
   const stmt = getDb().prepare(`
     INSERT INTO events (
-      timestamp, page_url, referrer, session_hash, 
-      country, screen_size, timezone, event_name, event_props
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      timestamp, page_url, referrer, session_hash,
+      country, screen_size, timezone, event_name, event_props,
+      utm_source, utm_medium, utm_campaign, utm_term, utm_content
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
-  
+
   return stmt.run(
     data.timestamp,
     data.page_url,
@@ -41,7 +42,12 @@ export function insertEvent(data) {
     data.screen_size,
     data.timezone,
     data.event_name || 'pageview',
-    data.event_props ? JSON.stringify(data.event_props) : null
+    data.event_props ? JSON.stringify(data.event_props) : null,
+    data.utm_source || null,
+    data.utm_medium || null,
+    data.utm_campaign || null,
+    data.utm_term || null,
+    data.utm_content || null
   );
 }
 
@@ -184,7 +190,63 @@ export function cleanupOldData() {
   const db = getDb();
   const retentionDays = parseInt(process.env.AGGREGATED_DATA_RETENTION || '365');
   const cutoffDate = Date.now() - (retentionDays * 86400000);
-  
+
   db.prepare('DELETE FROM stats_daily WHERE date < date(?, "unixepoch")').run(cutoffDate / 1000);
   db.prepare('DELETE FROM stats_hourly WHERE hour < datetime(?, "unixepoch")').run(cutoffDate / 1000);
+}
+
+/**
+ * Get campaign/UTM statistics for the given time period
+ * @param {number} startTime - Start timestamp in ms
+ * @param {number} endTime - End timestamp in ms
+ * @param {number} limit - Maximum number of results
+ * @returns {Array<{utm_source: string, utm_medium: string, utm_campaign: string, visits: number, unique_visitors: number}>}
+ */
+export function getCampaignStats(startTime, endTime, limit = 50) {
+  const stmt = getDb().prepare(`
+    SELECT
+      COALESCE(utm_source, 'direct') as utm_source,
+      COALESCE(utm_medium, 'none') as utm_medium,
+      COALESCE(utm_campaign, 'none') as utm_campaign,
+      COUNT(*) as visits,
+      COUNT(DISTINCT session_hash) as unique_visitors
+    FROM events
+    WHERE timestamp BETWEEN ? AND ?
+      AND event_name = 'pageview'
+      AND (utm_source IS NOT NULL OR utm_medium IS NOT NULL OR utm_campaign IS NOT NULL)
+    GROUP BY utm_source, utm_medium, utm_campaign
+    ORDER BY visits DESC
+    LIMIT ?
+  `);
+
+  return stmt.all(startTime, endTime, limit);
+}
+
+/**
+ * Get page views with comparison to previous period
+ * @param {number} startTime - Start timestamp in ms
+ * @param {number} endTime - End timestamp in ms
+ * @returns {{current: object, previous: object, change: object}}
+ */
+export function getPageViewsWithComparison(startTime, endTime) {
+  const duration = endTime - startTime;
+  const prevStartTime = startTime - duration;
+  const prevEndTime = endTime - duration;
+
+  const current = getPageViews(startTime, endTime);
+  const previous = getPageViews(prevStartTime, prevEndTime);
+
+  const calculateChange = (curr, prev) => {
+    if (prev === 0) return curr > 0 ? 100 : 0;
+    return Math.round(((curr - prev) / prev) * 100 * 10) / 10;
+  };
+
+  return {
+    current,
+    previous,
+    change: {
+      total: calculateChange(current.total || 0, previous.total || 0),
+      unique_visitors: calculateChange(current.unique_visitors || 0, previous.unique_visitors || 0)
+    }
+  };
 }

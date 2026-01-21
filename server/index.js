@@ -9,6 +9,8 @@ import { handleStats } from './api/stats.js';
 import { handleExport } from './api/export.js';
 import { createRateLimiter } from './utils/rateLimit.js';
 import { aggregateHourlyStats, cleanupOldData } from './db/queries.js';
+import { requireAuth, handleLogin, handleLogout, isAuthEnabled } from './middleware/auth.js';
+import { securityHeaders } from './middleware/security.js';
 
 dotenv.config();
 
@@ -58,35 +60,88 @@ function serveStatic(req, res, filePath) {
 function handleRequest(req, res) {
   const url = new URL(req.url, `http://${req.headers.host}`);
   const path = url.pathname;
-  
+
   console.log(`${new Date().toISOString()} ${req.method} ${path}`);
-  
-  if (path === '/api/collect') {
-    collectRateLimit(req, res, () => handleCollect(req, res));
-  } else if (path.startsWith('/api/stats/')) {
-    apiRateLimit(req, res, () => handleStats(req, res));
-  } else if (path === '/api/export') {
-    apiRateLimit(req, res, () => handleExport(req, res));
-  } else if (path === '/tracker.min.js') {
-    const trackerPath = join(__dirname, '../tracker/tracker.min.js');
-    serveStatic(req, res, trackerPath);
-  } else if (path === '/' || path === '/dashboard') {
-    const dashboardPath = join(__dirname, '../dashboard/index.html');
-    serveStatic(req, res, dashboardPath);
-  } else if (path.startsWith('/dashboard/')) {
-    const filePath = join(__dirname, '../dashboard', path.replace('/dashboard/', ''));
-    serveStatic(req, res, filePath);
-  } else if (path === '/health') {
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ 
-      status: 'ok', 
-      timestamp: Date.now(),
-      uptime: process.uptime()
-    }));
-  } else {
+
+  // Apply security headers to all responses
+  securityHeaders(req, res, () => {
+    // Public endpoints (no auth required)
+    if (path === '/api/collect') {
+      collectRateLimit(req, res, () => handleCollect(req, res));
+      return;
+    }
+
+    if (path === '/tracker.min.js') {
+      const trackerPath = join(__dirname, '../tracker/tracker.min.js');
+      serveStatic(req, res, trackerPath);
+      return;
+    }
+
+    if (path === '/health') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({
+        status: 'ok',
+        timestamp: Date.now(),
+        uptime: process.uptime(),
+        authEnabled: isAuthEnabled()
+      }));
+      return;
+    }
+
+    // Auth endpoints
+    if (path === '/api/login') {
+      handleLogin(req, res);
+      return;
+    }
+
+    if (path === '/api/logout') {
+      handleLogout(req, res);
+      return;
+    }
+
+    // Auth status endpoint
+    if (path === '/api/auth/status') {
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ authEnabled: isAuthEnabled() }));
+      return;
+    }
+
+    // Protected endpoints (auth required if AUTH_TOKEN is set)
+    if (path.startsWith('/api/stats/')) {
+      requireAuth(req, res, () => {
+        apiRateLimit(req, res, () => handleStats(req, res));
+      });
+      return;
+    }
+
+    if (path === '/api/export') {
+      requireAuth(req, res, () => {
+        apiRateLimit(req, res, () => handleExport(req, res));
+      });
+      return;
+    }
+
+    // Dashboard (auth required if AUTH_TOKEN is set)
+    if (path === '/' || path === '/dashboard') {
+      requireAuth(req, res, () => {
+        const dashboardPath = join(__dirname, '../dashboard/index.html');
+        serveStatic(req, res, dashboardPath);
+      });
+      return;
+    }
+
+    if (path.startsWith('/dashboard/')) {
+      requireAuth(req, res, () => {
+        const filePath = join(__dirname, '../dashboard', path.replace('/dashboard/', ''));
+        serveStatic(req, res, filePath);
+      });
+      return;
+    }
+
+    // 404 for unknown routes
     res.writeHead(404, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Not found' }));
-  }
+  });
 }
 
 const server = createServer(handleRequest);

@@ -1,5 +1,9 @@
 import { insertEvent, updateActiveVisitor, hashSession } from '../db/queries.js';
 import { extractIpInfo } from '../utils/geo.js';
+import { validateCollectData } from '../utils/validation.js';
+import { setCorsHeaders } from '../middleware/security.js';
+
+const MAX_BODY_SIZE = 10 * 1024; // 10KB limit
 
 const eventQueue = [];
 let flushTimer = null;
@@ -64,39 +68,57 @@ function parseReferrer(referrer) {
 }
 
 export function handleCollect(req, res) {
+  // Set CORS headers for all responses
+  setCorsHeaders(req, res);
+
   if (req.method === 'OPTIONS') {
-    res.writeHead(204, {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'POST',
-      'Access-Control-Allow-Headers': 'Content-Type',
-      'Access-Control-Max-Age': '86400'
-    });
+    res.writeHead(204);
     res.end();
     return;
   }
-  
+
   if (req.method !== 'POST') {
     res.writeHead(405, { 'Content-Type': 'application/json' });
     res.end(JSON.stringify({ error: 'Method not allowed' }));
     return;
   }
-  
+
   let body = '';
-  req.on('data', chunk => body += chunk);
+  let bodySize = 0;
+  let aborted = false;
+
+  req.on('data', chunk => {
+    if (aborted) return;
+
+    bodySize += chunk.length;
+    if (bodySize > MAX_BODY_SIZE) {
+      aborted = true;
+      res.writeHead(413, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: 'Request too large' }));
+      req.destroy();
+      return;
+    }
+    body += chunk;
+  });
+
   req.on('end', () => {
+    if (aborted) return;
+
     try {
       const data = JSON.parse(body);
-      
-      if (!data.url || !data.sid) {
+
+      // Validate input data
+      const validation = validateCollectData(data);
+      if (!validation.valid) {
         res.writeHead(400, { 'Content-Type': 'application/json' });
-        res.end(JSON.stringify({ error: 'Missing required fields' }));
+        res.end(JSON.stringify({ error: 'Invalid data', details: validation.errors }));
         return;
       }
-      
+
       const { ip, country } = extractIpInfo(req);
       const sessionHash = hashSession(data.sid, ip);
       const urlData = parseUrl(data.url);
-      
+
       const event = {
         timestamp: data.ts || Date.now(),
         page_url: urlData.path,
@@ -106,18 +128,23 @@ export function handleCollect(req, res) {
         screen_size: data.scr || null,
         timezone: data.tz || null,
         event_name: data.evt || 'pageview',
-        event_props: data.props || null
+        event_props: data.props || null,
+        // UTM parameters
+        utm_source: data.utm_source || null,
+        utm_medium: data.utm_medium || null,
+        utm_campaign: data.utm_campaign || null,
+        utm_term: data.utm_term || null,
+        utm_content: data.utm_content || null
       };
-      
+
       eventQueue.push(event);
       scheduleFlush();
-      
+
       res.writeHead(204, {
-        'Access-Control-Allow-Origin': '*',
         'Cache-Control': 'no-cache, no-store, must-revalidate'
       });
       res.end();
-      
+
     } catch (error) {
       console.error('Collection error:', error);
       res.writeHead(400, { 'Content-Type': 'application/json' });

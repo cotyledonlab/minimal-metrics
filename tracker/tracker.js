@@ -19,14 +19,31 @@
     return sid;
   }
   
+  function getUtmParams() {
+    var params = new URLSearchParams(window.location.search);
+    return {
+      utm_source: params.get('utm_source'),
+      utm_medium: params.get('utm_medium'),
+      utm_campaign: params.get('utm_campaign'),
+      utm_term: params.get('utm_term'),
+      utm_content: params.get('utm_content')
+    };
+  }
+
   function collectData() {
+    var utm = getUtmParams();
     return {
       url: window.location.href,
       ref: document.referrer || null,
       sid: getSessionId(),
-      scr: `${screen.width}x${screen.height}`,
+      scr: screen.width + 'x' + screen.height,
       tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
-      ts: Date.now()
+      ts: Date.now(),
+      utm_source: utm.utm_source,
+      utm_medium: utm.utm_medium,
+      utm_campaign: utm.utm_campaign,
+      utm_term: utm.utm_term,
+      utm_content: utm.utm_content
     };
   }
   

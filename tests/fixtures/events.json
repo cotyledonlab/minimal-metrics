@@ -1,0 +1,100 @@
+{
+  "pageviews": [
+    {
+      "url": "https://example.com/",
+      "sid": "session-001",
+      "ref": null,
+      "scr": "1920x1080",
+      "tz": "America/New_York"
+    },
+    {
+      "url": "https://example.com/blog",
+      "sid": "session-001",
+      "ref": "https://example.com/",
+      "scr": "1920x1080",
+      "tz": "America/New_York"
+    },
+    {
+      "url": "https://example.com/",
+      "sid": "session-002",
+      "ref": "https://google.com",
+      "scr": "1440x900",
+      "tz": "Europe/London"
+    },
+    {
+      "url": "https://example.com/pricing",
+      "sid": "session-002",
+      "ref": "https://example.com/",
+      "scr": "1440x900",
+      "tz": "Europe/London"
+    },
+    {
+      "url": "https://example.com/",
+      "sid": "session-003",
+      "ref": "https://twitter.com/status/123",
+      "scr": "375x667",
+      "tz": "Asia/Tokyo"
+    }
+  ],
+  "utmPageviews": [
+    {
+      "url": "https://example.com/landing",
+      "sid": "session-utm-001",
+      "ref": null,
+      "scr": "1920x1080",
+      "tz": "America/New_York",
+      "utm_source": "google",
+      "utm_medium": "cpc",
+      "utm_campaign": "spring-sale"
+    },
+    {
+      "url": "https://example.com/landing",
+      "sid": "session-utm-002",
+      "ref": null,
+      "scr": "1440x900",
+      "tz": "Europe/Berlin",
+      "utm_source": "google",
+      "utm_medium": "cpc",
+      "utm_campaign": "spring-sale"
+    },
+    {
+      "url": "https://example.com/promo",
+      "sid": "session-utm-003",
+      "ref": null,
+      "scr": "1366x768",
+      "tz": "America/Los_Angeles",
+      "utm_source": "twitter",
+      "utm_medium": "social",
+      "utm_campaign": "launch"
+    }
+  ],
+  "customEvents": [
+    {
+      "url": "https://example.com/signup",
+      "sid": "session-event-001",
+      "evt": "button_click",
+      "props": {
+        "button_id": "signup-cta",
+        "variant": "blue"
+      }
+    },
+    {
+      "url": "https://example.com/checkout",
+      "sid": "session-event-002",
+      "evt": "purchase",
+      "props": {
+        "product_id": "prod-123",
+        "value": 99.99,
+        "currency": "USD"
+      }
+    },
+    {
+      "url": "https://example.com/",
+      "sid": "session-event-003",
+      "evt": "newsletter_signup",
+      "props": {
+        "source": "footer"
+      }
+    }
+  ]
+}
