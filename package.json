@@ -34,9 +34,9 @@
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
-    "c8": "^8.0.0",
+    "c8": "^2.0.0",
     "esbuild": "^0.27.2",
-    "eslint": "^9.0.0",
+    "eslint": "^4.1.1",
     "supertest": "^6.3.0",
     "terser": "^5.26.0",
     "typescript": "^5.3.0"
