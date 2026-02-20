@@ -72,7 +72,7 @@ describe('createRateLimiter', () => {
     const req2 = createMockRequest({
       headers: { 'x-forwarded-for': '192.168.1.20' }
     });
-    const { res, getResult } = createMockResponse();
+    const { res } = createMockResponse();
 
     let called = false;
     rateLimiter(req2, res, () => {

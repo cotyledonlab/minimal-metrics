@@ -9,7 +9,6 @@ import {
   validateSessionId,
   validateReferrer,
   validateScreenSize,
-  validateTimezone,
   validateTimestamp,
   validateEventName,
   validateEventProps,
@@ -32,26 +31,26 @@ describe('validateUrl', () => {
   it('should reject non-string values', () => {
     const result = validateUrl(123);
     assert.strictEqual(result.valid, false);
-    assert.ok(result.error.includes('string'));
+    assert.ok(result.error?.includes('string'));
   });
 
   it('should reject empty strings', () => {
     const result = validateUrl('');
     assert.strictEqual(result.valid, false);
-    assert.ok(result.error.includes('required'));
+    assert.ok(result.error?.includes('required'));
   });
 
   it('should reject URLs that are too long', () => {
     const longUrl = 'https://example.com/' + 'a'.repeat(2000);
     const result = validateUrl(longUrl);
     assert.strictEqual(result.valid, false);
-    assert.ok(result.error.includes('maximum length'));
+    assert.ok(result.error?.includes('maximum length'));
   });
 
   it('should reject URLs without protocol', () => {
     const result = validateUrl('example.com/page');
     assert.strictEqual(result.valid, false);
-    assert.ok(result.error.includes('http'));
+    assert.ok(result.error?.includes('http'));
   });
 });
 
@@ -69,7 +68,7 @@ describe('validateSessionId', () => {
   it('should reject session IDs with invalid characters', () => {
     const result = validateSessionId('session<script>');
     assert.strictEqual(result.valid, false);
-    assert.ok(result.error.includes('invalid characters'));
+    assert.ok(result.error?.includes('invalid characters'));
   });
 
   it('should reject session IDs that are too long', () => {
@@ -111,7 +110,7 @@ describe('validateScreenSize', () => {
   it('should reject invalid format', () => {
     const result = validateScreenSize('1920-1080');
     assert.strictEqual(result.valid, false);
-    assert.ok(result.error.includes('format'));
+    assert.ok(result.error?.includes('format'));
   });
 
   it('should reject non-numeric dimensions', () => {
@@ -140,7 +139,7 @@ describe('validateTimestamp', () => {
     const oldTimestamp = new Date('2019-01-01').getTime();
     const result = validateTimestamp(oldTimestamp);
     assert.strictEqual(result.valid, false);
-    assert.ok(result.error.includes('range'));
+    assert.ok(result.error?.includes('range'));
   });
 
   it('should reject timestamps too far in the future', () => {
@@ -182,7 +181,7 @@ describe('validateEventProps', () => {
   it('should reject arrays', () => {
     const result = validateEventProps(['item1', 'item2']);
     assert.strictEqual(result.valid, false);
-    assert.ok(result.error.includes('object'));
+    assert.ok(result.error?.includes('object'));
   });
 
   it('should reject properties that are too large', () => {

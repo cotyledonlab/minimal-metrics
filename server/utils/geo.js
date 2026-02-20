@@ -1,9 +1,3 @@
-import { readFileSync } from 'fs';
-import { join, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
-
 const countryMap = {
   'US': 'United States',
   'GB': 'United Kingdom',
@@ -60,15 +54,6 @@ const countryMap = {
   'BD': 'Bangladesh'
 };
 
-function ipToInt(ip) {
-  const parts = ip.split('.');
-  if (parts.length !== 4) return 0;
-  
-  return parts.reduce((acc, part, i) => {
-    return acc + (parseInt(part) << ((3 - i) * 8));
-  }, 0);
-}
-
 function parseCloudflareHeaders(headers) {
   if (headers['cf-ipcountry']) {
     const code = headers['cf-ipcountry'];
@@ -95,18 +80,18 @@ function getIpFromHeaders(headers) {
 export function getCountryFromIp(ip, headers = {}) {
   const cloudflareCountry = parseCloudflareHeaders(headers);
   if (cloudflareCountry) return cloudflareCountry;
-  
+
   const headerCountry = parseIpCountryHeader(headers);
   if (headerCountry) return headerCountry;
-  
+
   if (!ip || ip === '::1' || ip === '127.0.0.1') {
     return 'Local';
   }
-  
+
   if (ip.startsWith('192.168.') || ip.startsWith('10.') || ip.startsWith('172.')) {
     return 'Private Network';
   }
-  
+
   return 'Unknown';
 }
 
@@ -114,6 +99,6 @@ export function extractIpInfo(req) {
   const headers = req.headers || {};
   const ip = getIpFromHeaders(headers) || req.socket?.remoteAddress;
   const country = getCountryFromIp(ip, headers);
-  
+
   return { ip, country };
 }
