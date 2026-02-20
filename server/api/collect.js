@@ -10,9 +10,9 @@ let flushTimer = null;
 
 function flushEvents() {
   if (eventQueue.length === 0) return;
-  
+
   const events = eventQueue.splice(0, eventQueue.length);
-  
+
   for (const event of events) {
     try {
       insertEvent(event);
@@ -47,10 +47,10 @@ function parseUrl(url) {
 
 function parseReferrer(referrer) {
   if (!referrer) return null;
-  
+
   try {
     const url = new URL(referrer);
-    
+
     if (url.hostname.includes('google')) return 'Google';
     if (url.hostname.includes('facebook')) return 'Facebook';
     if (url.hostname.includes('twitter') || url.hostname.includes('t.co')) return 'Twitter';
@@ -60,7 +60,7 @@ function parseReferrer(referrer) {
     if (url.hostname.includes('github')) return 'GitHub';
     if (url.hostname.includes('bing')) return 'Bing';
     if (url.hostname.includes('duckduckgo')) return 'DuckDuckGo';
-    
+
     return url.hostname;
   } catch {
     return referrer;

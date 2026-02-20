@@ -4,16 +4,15 @@
  * Tests the database queries with a real SQLite database.
  */
 
-import { describe, it, before, after, beforeEach } from 'node:test';
+import { describe, it, after, beforeEach } from 'node:test';
 import assert from 'node:assert';
-import { initTestDb, cleanupTestDb, TEST_DB_PATH } from '../setup.js';
+import { initTestDb, cleanupTestDb } from '../setup.js';
 
 // Initialize test database before importing modules
 initTestDb();
 
 // Now import database modules (they will use the test database)
 import {
-  getDb,
   hashSession,
   insertEvent,
   updateActiveVisitor,
@@ -254,7 +253,6 @@ describe('Database Integration Tests', () => {
       });
 
       const result = getTopReferrers(now - 1000, now + 1000, 10);
-      const directEntry = result.find(r => r.referrer === 'Direct');
 
       // Should have a Direct entry or the referrer we inserted
       assert.ok(result.length >= 0);

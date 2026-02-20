@@ -30,7 +30,9 @@ export default [
         setTimeout: 'readonly',
         setInterval: 'readonly',
         clearTimeout: 'readonly',
-        clearInterval: 'readonly'
+        clearInterval: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly'
       }
     },
     rules: {
@@ -55,7 +57,7 @@ export default [
   },
   {
     // Tracker script (browser code)
-    files: ['tracker/**/*.js'],
+    files: ['tracker/tracker.js', 'tracker/vitals.js'],
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: 'script',
@@ -71,13 +73,39 @@ export default [
         MutationObserver: 'readonly',
         Intl: 'readonly',
         screen: 'readonly',
-        console: 'readonly'
+        console: 'readonly',
+        URL: 'readonly',
+        URLSearchParams: 'readonly',
+        Blob: 'readonly',
+        setTimeout: 'readonly',
+        PerformanceObserver: 'readonly',
+        performance: 'readonly'
+      }
+    },
+    rules: {
+      'no-unused-vars': ['error', { argsIgnorePattern: '^_', caughtErrors: 'none' }],
+      'no-undef': 'error',
+      'no-console': 'off', // Console is stripped in build
+      'semi': ['error', 'always'],
+      'quotes': ['error', 'single', { avoidEscape: true }]
+    }
+  },
+    {
+    // Tracker build script (Node.js module)
+    files: ['tracker/build.js'],
+    languageOptions: {
+      ecmaVersion: 2022,
+      sourceType: 'module',
+      globals: {
+        console: 'readonly',
+        process: 'readonly',
+        Buffer: 'readonly'
       }
     },
     rules: {
       'no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       'no-undef': 'error',
-      'no-console': 'off', // Console is stripped in build
+      'no-console': 'off',
       'semi': ['error', 'always'],
       'quotes': ['error', 'single', { avoidEscape: true }]
     }

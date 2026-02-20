@@ -19,7 +19,7 @@ function parseTimeRange(period = '7d') {
     '30d': 30 * 86400000,
     '90d': 90 * 86400000
   };
-  
+
   const duration = periods[period] || periods['7d'];
   return {
     startTime: now - duration,
@@ -92,7 +92,7 @@ export function handleStats(req, res) {
       }
 
       case 'pages': {
-        const limit = parseInt(url.searchParams.get('limit')) || 20;
+        const limit = parseInt(url.searchParams.get('limit') ?? '') || 20;
         const pages = getTopPages(startTime, endTime, Math.min(limit, 100));
         sendJson(req, res, {
           period,
@@ -103,7 +103,7 @@ export function handleStats(req, res) {
       }
 
       case 'referrers': {
-        const refLimit = parseInt(url.searchParams.get('limit')) || 20;
+        const refLimit = parseInt(url.searchParams.get('limit') ?? '') || 20;
         const referrers = getTopReferrers(startTime, endTime, Math.min(refLimit, 100));
         sendJson(req, res, {
           period,
@@ -146,7 +146,7 @@ export function handleStats(req, res) {
       }
 
       case 'campaigns': {
-        const campLimit = parseInt(url.searchParams.get('limit')) || 50;
+        const campLimit = parseInt(url.searchParams.get('limit') ?? '') || 50;
         const campaigns = getCampaignStats(startTime, endTime, Math.min(campLimit, 100));
         sendJson(req, res, {
           period,

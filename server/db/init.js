@@ -21,10 +21,10 @@ const schema = readFileSync(join(__dirname, 'schema.sql'), 'utf8');
 try {
   db.exec(schema);
   console.log('✓ Database initialized successfully');
-  
+
   const tables = db.prepare("SELECT name FROM sqlite_master WHERE type='table'").all();
   console.log('✓ Created tables:', tables.map(t => t.name).join(', '));
-  
+
 } catch (error) {
   console.error('✗ Database initialization failed:', error);
   process.exit(1);

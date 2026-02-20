@@ -196,39 +196,39 @@ export function validateUtm(utm, name) {
  * @returns {{ valid: boolean, errors: string[] }}
  */
 export function validateCollectData(data) {
-  const errors = [];
+  const errors = /** @type {string[]} */ ([]);
 
   // Required fields
   const urlResult = validateUrl(data.url);
-  if (!urlResult.valid) errors.push(urlResult.error);
+  if (!urlResult.valid) errors.push(urlResult.error ?? '');
 
   const sidResult = validateSessionId(data.sid);
-  if (!sidResult.valid) errors.push(sidResult.error);
+  if (!sidResult.valid) errors.push(sidResult.error ?? '');
 
   // Optional fields
   const refResult = validateReferrer(data.ref);
-  if (!refResult.valid) errors.push(refResult.error);
+  if (!refResult.valid) errors.push(refResult.error ?? '');
 
   const scrResult = validateScreenSize(data.scr);
-  if (!scrResult.valid) errors.push(scrResult.error);
+  if (!scrResult.valid) errors.push(scrResult.error ?? '');
 
   const tzResult = validateTimezone(data.tz);
-  if (!tzResult.valid) errors.push(tzResult.error);
+  if (!tzResult.valid) errors.push(tzResult.error ?? '');
 
   const tsResult = validateTimestamp(data.ts);
-  if (!tsResult.valid) errors.push(tsResult.error);
+  if (!tsResult.valid) errors.push(tsResult.error ?? '');
 
   const evtResult = validateEventName(data.evt);
-  if (!evtResult.valid) errors.push(evtResult.error);
+  if (!evtResult.valid) errors.push(evtResult.error ?? '');
 
   const propsResult = validateEventProps(data.props);
-  if (!propsResult.valid) errors.push(propsResult.error);
+  if (!propsResult.valid) errors.push(propsResult.error ?? '');
 
   // UTM parameters
   const utmFields = ['utm_source', 'utm_medium', 'utm_campaign', 'utm_term', 'utm_content'];
   for (const field of utmFields) {
     const utmResult = validateUtm(data[field], field);
-    if (!utmResult.valid) errors.push(utmResult.error);
+    if (!utmResult.valid) errors.push(utmResult.error ?? '');
   }
 
   return { valid: errors.length === 0, errors };
@@ -236,7 +236,7 @@ export function validateCollectData(data) {
 
 /**
  * Sanitize string by removing control characters
- * @param {string} str
+ * @param {unknown} str
  * @returns {string}
  */
 export function sanitizeString(str) {

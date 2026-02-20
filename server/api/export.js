@@ -7,7 +7,7 @@ function parseTimeRange(period = '30d') {
     '30d': 30 * 86400000,
     '90d': 90 * 86400000
   };
-  
+
   const duration = periods[period] || periods['30d'];
   return {
     startTime: now - duration,
@@ -17,17 +17,17 @@ function parseTimeRange(period = '30d') {
 
 function formatCsv(data, headers) {
   const csvRows = [headers.join(',')];
-  
+
   for (const row of data) {
     const values = headers.map(header => {
       const value = row[header] || '';
-      return typeof value === 'string' && value.includes(',') 
-        ? `"${value}"` 
+      return typeof value === 'string' && value.includes(',')
+        ? `"${value}"`
         : value;
     });
     csvRows.push(values.join(','));
   }
-  
+
   return csvRows.join('\n');
 }
 
@@ -37,18 +37,18 @@ export function handleExport(req, res) {
   const type = url.searchParams.get('type') || 'overview';
   const period = url.searchParams.get('period') || '30d';
   const { startTime, endTime } = parseTimeRange(period);
-  
+
   try {
     let data = {};
-    let filename = `minimal-metrics-${type}-${period}`;
-    
+    const filename = `minimal-metrics-${type}-${period}`;
+
     switch (type) {
       case 'overview':
         const pageViews = getPageViews(startTime, endTime);
         const topPages = getTopPages(startTime, endTime, 50);
         const topReferrers = getTopReferrers(startTime, endTime, 50);
         const countries = getCountryStats(startTime, endTime);
-        
+
         data = {
           summary: {
             period,
@@ -62,35 +62,35 @@ export function handleExport(req, res) {
           countries: countries
         };
         break;
-        
+
       case 'pages':
         data = getTopPages(startTime, endTime, 1000);
         break;
-        
+
       case 'referrers':
         data = getTopReferrers(startTime, endTime, 1000);
         break;
-        
+
       case 'countries':
         data = getCountryStats(startTime, endTime);
         break;
-        
+
       default:
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Invalid export type' }));
         return;
     }
-    
+
     if (format === 'csv') {
       let csvData = '';
       let headers = [];
-      
+
       if (type === 'overview') {
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'CSV format not available for overview export' }));
         return;
       }
-      
+
       if (type === 'pages') {
         headers = ['page_url', 'views', 'unique_visitors'];
       } else if (type === 'referrers') {
@@ -98,16 +98,16 @@ export function handleExport(req, res) {
       } else if (type === 'countries') {
         headers = ['country', 'visits', 'unique_visitors'];
       }
-      
+
       csvData = formatCsv(data, headers);
-      
+
       res.writeHead(200, {
         'Content-Type': 'text/csv',
         'Content-Disposition': `attachment; filename="${filename}.csv"`,
         'Access-Control-Allow-Origin': '*'
       });
       res.end(csvData);
-      
+
     } else {
       res.writeHead(200, {
         'Content-Type': 'application/json',
@@ -116,7 +116,7 @@ export function handleExport(req, res) {
       });
       res.end(JSON.stringify(data, null, 2));
     }
-    
+
   } catch (error) {
     console.error('Export error:', error);
     res.writeHead(500, { 'Content-Type': 'application/json' });

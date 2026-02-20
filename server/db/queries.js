@@ -60,7 +60,7 @@ export function updateActiveVisitor(sessionHash, pageUrl, country) {
       last_seen = excluded.last_seen,
       page_count = page_count + 1
   `);
-  
+
   return stmt.run(sessionHash, pageUrl, country, Math.floor(Date.now() / 1000));
 }
 
@@ -70,7 +70,7 @@ export function getActiveVisitors() {
     FROM active_visitors
     WHERE last_seen > ?
   `);
-  
+
   const fiveMinutesAgo = Math.floor(Date.now() / 1000) - 300;
   return stmt.get(fiveMinutesAgo);
 }
@@ -84,7 +84,7 @@ export function getPageViews(startTime, endTime) {
     WHERE timestamp BETWEEN ? AND ?
       AND event_name = 'pageview'
   `);
-  
+
   return stmt.get(startTime, endTime);
 }
 
@@ -101,7 +101,7 @@ export function getTopPages(startTime, endTime, limit = 10) {
     ORDER BY views DESC
     LIMIT ?
   `);
-  
+
   return stmt.all(startTime, endTime, limit);
 }
 
@@ -118,7 +118,7 @@ export function getTopReferrers(startTime, endTime, limit = 10) {
     ORDER BY visits DESC
     LIMIT ?
   `);
-  
+
   return stmt.all(startTime, endTime, limit);
 }
 
@@ -135,7 +135,7 @@ export function getCountryStats(startTime, endTime) {
     GROUP BY country
     ORDER BY visits DESC
   `);
-  
+
   return stmt.all(startTime, endTime);
 }
 
@@ -151,7 +151,7 @@ export function getHourlyStats(date) {
     GROUP BY hour
     ORDER BY hour
   `);
-  
+
   return stmt.all(date);
 }
 
@@ -159,7 +159,7 @@ export function aggregateHourlyStats() {
   const db = getDb();
   const transaction = db.transaction(() => {
     const hourAgo = Date.now() - 3600000;
-    
+
     const stats = db.prepare(`
       SELECT 
         datetime(timestamp/1000, 'unixepoch', 'start of hour') as hour,
@@ -170,19 +170,19 @@ export function aggregateHourlyStats() {
         AND event_name = 'pageview'
       GROUP BY hour
     `).all(hourAgo);
-    
+
     const insertStmt = db.prepare(`
       INSERT OR REPLACE INTO stats_hourly (hour, page_views, unique_visitors)
       VALUES (?, ?, ?)
     `);
-    
+
     for (const stat of stats) {
       insertStmt.run(stat.hour, stat.page_views, stat.unique_visitors);
     }
-    
+
     db.prepare('DELETE FROM events WHERE timestamp < ?').run(hourAgo - 86400000);
   });
-  
+
   transaction();
 }
 

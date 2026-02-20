@@ -15,7 +15,7 @@ import { securityHeaders } from './middleware/security.js';
 dotenv.config();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
-const PORT = process.env.PORT || 3000;
+const PORT = parseInt(process.env.PORT ?? '') || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 const collectRateLimit = createRateLimiter(60000, 200);
@@ -40,11 +40,11 @@ function serveStatic(req, res, filePath) {
       res.end('Not Found');
       return;
     }
-    
+
     const ext = extname(filePath);
     const contentType = mimeTypes[ext] || 'application/octet-stream';
     const content = readFileSync(filePath);
-    
+
     res.writeHead(200, {
       'Content-Type': contentType,
       'Cache-Control': ext === '.html' ? 'no-cache' : 'public, max-age=86400'

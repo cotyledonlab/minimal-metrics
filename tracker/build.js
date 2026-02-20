@@ -32,7 +32,7 @@ async function build() {
     
     writeFileSync(join(__dirname, 'tracker.min.js'), output);
     
-    console.log(`✓ Tracker built successfully`);
+    console.log('✓ Tracker built successfully');
     console.log(`  Size: ${size} bytes (${(size / 1024).toFixed(2)} KB)`);
     
     if (size > 2048) {
@@ -43,7 +43,7 @@ async function build() {
 <script async defer data-host="${process.env.MM_HOST || 'https://your-domain.com'}" src="${process.env.MM_HOST || 'https://your-domain.com'}/tracker.min.js"></script>`;
     
     writeFileSync(join(__dirname, 'snippet.html'), snippet);
-    console.log(`✓ Snippet saved to tracker/snippet.html`);
+    console.log('✓ Snippet saved to tracker/snippet.html');
     
   } catch (error) {
     console.error('Build failed:', error);

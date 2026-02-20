@@ -11,7 +11,7 @@
  * @returns {Record<string, string>}
  */
 function parseCookies(cookieHeader) {
-  const cookies = {};
+  const cookies = /** @type {Record<string, string>} */ ({});
   if (!cookieHeader) return cookies;
 
   cookieHeader.split(';').forEach(cookie => {
